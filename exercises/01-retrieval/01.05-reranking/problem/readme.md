@@ -17,10 +17,10 @@ We are going to implement it in this exercise.
 
 ## Slicing the search results
 
-Our first TODOs are just under the `searchTypeScriptDocs` function, inside the `/api/chat.ts` POST route:
+Our first TODOs are just under the `searchEmails` function, inside the `/api/chat.ts` POST route:
 
 ```ts
-const searchResults = await searchTypeScriptDocs({
+const searchResults = await searchEmails({
   keywordsForBM25: keywords.object.keywords,
   embeddingsQuery: keywords.object.searchQuery,
 });
@@ -30,18 +30,20 @@ const searchResults = await searchTypeScriptDocs({
 const topSearchResultsWithId = TODO;
 ```
 
-Our plan here is to take the search results that we get from `searchTypeScriptDocs`, which have already been rank fused. We're then going to slice those results so we just get the top 30, and then we're going to add an ID to each result.
+Our plan here is to take the search results that we get from `searchEmails`, which have already been rank fused. We're then going to slice those results so we just get the top 30, and then we're going to add an ID to each result.
 
-I've then got some code to translate it into text here, to format it so that the ID comes first, then the file name comes next, and then the content comes in these XML tags:
+I've then got some code to translate it into text here, to format it so that the ID comes first, then the email metadata comes next, and then the content comes in these XML tags:
 
 ```ts
 const topSearchResultsAsText = topSearchResultsWithId
   .map((result) =>
     [
       `## ID: ${result.id}`,
-      `### Title: ${result.filename}`,
+      `### From: ${result.email.from}`,
+      `### To: ${result.email.to}`,
+      `### Subject: ${result.email.subject}`,
       `<content>`,
-      result.content,
+      result.email.body,
       `</content>`,
     ].join('\n\n'),
   )
@@ -67,23 +69,23 @@ Now here's the big TODO. We need a `generateObject` call that filters down to on
 const rerankedSearchResults = TODO;
 ```
 
-And here's a really important point: We only want it to return the IDs of the most relevant documents. We could get it to return all of the content too, but that would be extremely token wasteful, because really we're just passing a bunch of documents to this LLM and just asking it for the references to those documents.
+And here's a really important point: We only want it to return the IDs of the most relevant emails. We could get it to return all of the content too, but that would be extremely token wasteful, because really we're just passing a bunch of emails to this LLM and just asking it for the references to those emails.
 
 You can also use this `RERANKER_SYSTEM_PROMPT`, which I've got above:
 
 ```ts
-const RERANKER_SYSTEM_PROMPT = `You are a search result reranker. Your job is to analyze a list of documentation pages and return only the IDs of the most relevant pages for answering the user's question.
+const RERANKER_SYSTEM_PROMPT = `You are a search result reranker. Your job is to analyze a list of emails and return only the IDs of the most relevant emails for answering the user's question.
 
-Given a list of documentation pages with their IDs, filenames, and content, you should:
-1. Evaluate how relevant each page is to the user's question
-2. Return only the IDs of the most relevant pages
+Given a list of emails with their IDs and content, you should:
+1. Evaluate how relevant each email is to the user's question
+2. Return only the IDs of the most relevant emails
 
-You should be selective and only include pages that are genuinely helpful for answering the question. If a page is only tangentially related or not relevant, exclude its ID.
+You should be selective and only include emails that are genuinely helpful for answering the question. If an email is only tangentially related or not relevant, exclude its ID.
 
 Return the IDs as a simple array of numbers.`;
 ```
 
-We're then going to map over them, grabbing the references to the actual documents from the ID that we get back from the LLM.
+We're then going to map over them, grabbing the references to the actual emails from the ID that we get back from the LLM.
 
 ```ts
 // Make an object out of the top search results
@@ -92,7 +94,7 @@ const topSearchResultsAsMap = new Map(
 );
 
 // Map over the IDs that we got back from the LLM
-// and grab the references to the actual documents from the ID
+// and grab the references to the actual emails from the ID
 const topSearchResults = rerankedSearchResults.object.resultIds
   .map((id) => topSearchResultsAsMap.get(id))
   .filter((result) => result !== undefined);
@@ -100,7 +102,7 @@ const topSearchResults = rerankedSearchResults.object.resultIds
 
 We also filter out any that were hallucinated by the LLM, because the LLM might invent its own IDs that don't actually exist in our ID set.
 
-Once this is implemented, you should be able to run the exercise locally, try asking it a few TypeScript questions, and see what documents get pulled out. In theory, this should improve the quality of our retrieval, which will improve the quality of our whole system, but also you may want to monitor how fast this is taking, because this approach will certainly add latency.
+Once this is implemented, you should be able to run the exercise locally, try asking it a few email questions, and see what emails get pulled out. In theory, this should improve the quality of our retrieval, which will improve the quality of our whole system, but also you may want to monitor how fast this is taking, because this approach will certainly add latency.
 
 Good luck, and I'll see you in the solution.
 
@@ -109,12 +111,12 @@ Good luck, and I'll see you in the solution.
 - [ ] Complete the first TODO by slicing the search results to the top `30` and adding an ID to each result using the array index
 
 - [ ] Implement the second TODO by creating a `generateObject` call that uses the `RERANKER_SYSTEM_PROMPT`
-  - Configure the `generateObject` call to only return the IDs of the most relevant documents (not the full content)
+  - Configure the `generateObject` call to only return the IDs of the most relevant emails (not the full content)
   - Pass the search query and formatted search results text to the `generateObject` call
 
-- [ ] Run the exercise locally and test it by asking TypeScript questions
+- [ ] Run the exercise locally and test it by asking email questions
 
-- [ ] Observe which documents are being selected by the re-ranker in the console logs
+- [ ] Observe which emails are being selected by the re-ranker in the console logs
 
 - [ ] Monitor the impact on response time/latency
 

@@ -7,7 +7,7 @@ import {
   type UIMessage,
 } from 'ai';
 import { z } from 'zod';
-import { searchTypeScriptDocs } from './search.ts';
+import { searchEmails } from './search.ts';
 
 export type MyMessage = UIMessage<unknown, {}>;
 
@@ -27,13 +27,13 @@ const formatMessageHistory = (messages: UIMessage[]) => {
     .join('\n');
 };
 
-const RERANKER_SYSTEM_PROMPT = `You are a search result reranker. Your job is to analyze a list of documentation pages and return only the IDs of the most relevant pages for answering the user's question.
+const RERANKER_SYSTEM_PROMPT = `You are a search result reranker. Your job is to analyze a list of emails and return only the IDs of the most relevant emails for answering the user's question.
 
-Given a list of documentation pages with their IDs, filenames, and content, you should:
-1. Evaluate how relevant each page is to the user's question
-2. Return only the IDs of the most relevant pages
+Given a list of emails with their IDs and content, you should:
+1. Evaluate how relevant each email is to the user's question
+2. Return only the IDs of the most relevant emails
 
-You should be selective and only include pages that are genuinely helpful for answering the question. If a page is only tangentially related or not relevant, exclude its ID.
+You should be selective and only include emails that are genuinely helpful for answering the question. If an email is only tangentially related or not relevant, exclude its ID.
 
 Return the IDs as a simple array of numbers.`;
 
@@ -45,20 +45,20 @@ export const POST = async (req: Request): Promise<Response> => {
     execute: async ({ writer }) => {
       const keywords = await generateObject({
         model: google('gemini-2.0-flash-001'),
-        system: `You are a helpful TypeScript developer, able to search the TypeScript docs for information.
-          Your job is to generate a list of keywords which will be used to search the TypeScript docs.
-          You should also generate a search query which will be used to search the TypeScript docs. This will be used for semantic search, so can be more general.
+        system: `You are a helpful email assistant, able to search emails for information.
+          Your job is to generate a list of keywords which will be used to search emails.
+          You should also generate a search query which will be used to search emails. This will be used for semantic search, so can be more general.
         `,
         schema: z.object({
           keywords: z
             .array(z.string())
             .describe(
-              'A list of keywords to search the TypeScript docs with. Use these for exact terminology.',
+              'A list of keywords to search emails with. Use these for exact terminology.',
             ),
           searchQuery: z
             .string()
             .describe(
-              'A search query which will be used to search the TypeScript docs. Use this for broader terms.',
+              'A search query which will be used to search emails. Use this for broader terms.',
             ),
         }),
         prompt: `
@@ -69,7 +69,7 @@ export const POST = async (req: Request): Promise<Response> => {
 
       console.dir(keywords.object, { depth: null });
 
-      const searchResults = await searchTypeScriptDocs({
+      const searchResults = await searchEmails({
         keywordsForBM25: keywords.object.keywords,
         embeddingsQuery: keywords.object.searchQuery,
       });
@@ -82,9 +82,11 @@ export const POST = async (req: Request): Promise<Response> => {
         .map((result) =>
           [
             `## ID: ${result.id}`,
-            `### Title: ${result.filename}`,
+            `### From: ${result.email.from}`,
+            `### To: ${result.email.to}`,
+            `### Subject: ${result.email.subject}`,
             `<content>`,
-            result.content,
+            result.email.body,
             `</content>`,
           ].join('\n\n'),
         )
@@ -112,7 +114,7 @@ export const POST = async (req: Request): Promise<Response> => {
           .filter((result) => result !== undefined);
 
       console.dir(
-        topSearchResults.map((result) => result.filename),
+        topSearchResults.map((result) => result.email.subject),
         {
           depth: null,
         },
@@ -120,29 +122,32 @@ export const POST = async (req: Request): Promise<Response> => {
 
       const answer = streamText({
         model: google('gemini-2.0-flash-001'),
-        system: `You are a helpful TypeScript documentation assistant that answers questions based on the TypeScript documentation.
-          You should use the provided documentation snippets to answer questions accurately.
-          ALWAYS cite sources using markdown formatting with the filename as the source.
+        system: `You are a helpful email assistant that answers questions based on email content.
+          You should use the provided emails to answer questions accurately.
+          ALWAYS cite sources using markdown formatting with the email subject as the source.
           Be concise but thorough in your explanations.
         `,
         prompt: [
           '## Conversation History',
           formatMessageHistory(messages),
-          '## TypeScript Documentation Snippets',
+          '## Emails',
           ...topSearchResults.map((result, i) => {
-            const filename =
-              result.filename || `document-${i + 1}`;
-
-            const content = result.content || '';
+            const from = result.email?.from || 'unknown';
+            const to = result.email?.to || 'unknown';
+            const subject =
+              result.email?.subject || `email-${i + 1}`;
+            const body = result.email?.body || '';
 
             return [
-              `### 📄 Source ${i + 1}: [${filename}](#${filename.replace(/[^a-zA-Z0-9]/g, '-')})`,
-              content,
+              `### 📧 Email ${i + 1}: [${subject}](#${subject.replace(/[^a-zA-Z0-9]/g, '-')})`,
+              `**From:** ${from}`,
+              `**To:** ${to}`,
+              body,
               '---',
             ].join('\n\n');
           }),
           '## Instructions',
-          "Based on the TypeScript documentation above, please answer the user's question. Always cite your sources using the filename in markdown format.",
+          "Based on the emails above, please answer the user's question. Always cite your sources using the email subject in markdown format.",
         ].join('\n\n'),
       });
 
