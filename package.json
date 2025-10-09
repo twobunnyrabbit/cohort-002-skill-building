@@ -41,6 +41,7 @@
     "langfuse": "^3.38.4",
     "langfuse-vercel": "^3.38.4",
     "lucide-react": "^0.525.0",
+    "okapibm25": "^1.4.1",
     "papaparse": "^5.5.3",
     "prompts": "^2.4.2",
     "react": "^19.1.0",
