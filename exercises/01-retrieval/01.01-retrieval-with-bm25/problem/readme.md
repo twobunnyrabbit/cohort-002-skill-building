@@ -10,11 +10,11 @@ In this exercise, we'll implement a simple and cost-effective approach to this p
 
 ## The Setup
 
-We're building a TypeScript documentation assistant that will:
+We're building an email search assistant that will:
 
 1. Generate keywords from user questions
-2. Search TypeScript docs using those keywords using the BM25 algorithm
-3. Feed the most relevant doc snippets to the LLM to produce accurate answers
+2. Search emails using those keywords using the BM25 algorithm
+3. Feed the most relevant emails to the LLM to produce accurate answers
 
 Let's examine our setup. We have a POST route handler that receives messages from the user:
 
@@ -44,61 +44,49 @@ export const POST = async (req: Request): Promise<Response> => {
 
 Our first task is implementing a keyword generator. We need to extract relevant search terms from the conversation history. This is where we'll use `streamObject` from the AI SDK.
 
-For search functionality, we'll use the [BM25 algorithm](https://en.wikipedia.org/wiki/Okapi_BM25) (Best Match 25), which ranks documents based on keyword relevance. The system loads TypeScript documentation from the repo's root at `datasets/ts-docs` using the [`loadTsDocs`](./api/bm25.ts) function:
+For search functionality, we'll use the [BM25 algorithm](https://en.wikipedia.org/wiki/Okapi_BM25) (Best Match 25), which ranks documents based on keyword relevance. The system loads emails from the repo's root at `datasets/emails.json` using the [`loadEmails`](./api/bm25.ts) function:
 
 ```ts
-export const loadTsDocs = async () => {
-  const TS_DOCS_LOCATION = path.resolve(
+export const loadEmails = async () => {
+  const EMAILS_LOCATION = path.resolve(
     import.meta.dirname,
-    '../../../../../datasets/ts-docs',
+    '../../../../../datasets/emails.json',
   );
 
-  const files = await readdir(TS_DOCS_LOCATION);
+  const content = await readFile(EMAILS_LOCATION, 'utf8');
+  const emails: Email[] = JSON.parse(content);
 
-  const docs = await Promise.all(
-    files.map(async (file) => {
-      const filePath = path.join(TS_DOCS_LOCATION, file);
-      const content = await readFile(filePath, 'utf8');
-      return {
-        filename: file,
-        content,
-      };
-    }),
-  );
-
-  return docs;
+  return emails;
 };
 ```
 
-This function reads all the TypeScript documentation files from the dataset and returns an array of objects containing the filename and content of each document.
+This function reads all the emails from the dataset and returns an array of email objects containing fields like from, to, subject, body, and more.
 
-The [`searchTypeScriptDocs`](./api/bm25.ts) function then uses these documents for keyword searching:
+The [`searchEmails`](./api/bm25.ts) function then uses these emails for keyword searching:
 
 ```ts
-export const searchTypeScriptDocs = async (
-  keywords: string[],
-) => {
-  const docs = await loadTsDocs();
+export const searchEmails = async (keywords: string[]) => {
+  const emails = await loadEmails();
 
   const scores: number[] = (BM25 as any)(
-    docs.map((doc) => doc.content),
+    emails.map((email) => `${email.subject} ${email.body}`),
     keywords,
   );
 
   return scores
     .map((score, index) => ({
       score,
-      doc: docs[index],
+      email: emails[index],
     }))
     .sort((a, b) => b.score - a.score);
 };
 ```
 
-This function calculates relevance scores for each document based on our keywords, and returns a sorted list with the most relevant docs first.
+This function calculates relevance scores for each email based on our keywords, combining both subject and body content for searching, and returns a sorted list with the most relevant emails first.
 
-After getting search results, we need to select the top X most relevant documents to feed into our LLM. There are many docs, so we need to be selective about how many we pass to the model.
+After getting search results, we need to select the top X most relevant emails to feed into our LLM. There are many emails, so we need to be selective about how many we pass to the model.
 
-Finally, we'll use these selected documents as context for the LLM to generate an informative response that cites sources from the TypeScript documentation.
+Finally, we'll use these selected emails as context for the LLM to generate an informative response that cites sources from the email threads.
 
 BM25 is a simple starting point for this task - not perfect, but effective for getting started. In future exercises, we'll explore more sophisticated approaches.
 
@@ -152,12 +140,12 @@ So all you need to do is write the queries to the stream writer.
 - [ ] Write the queries to the stream writer using `writer.write`
   - Since we only need one `queries` data part, make sure you upsert it using a stable `id`. Check the [reference](/exercises/99-reference/99.4-custom-data-parts-id-reconciliation/explainer/readme.md) for an example of how to do this.
 
-- [ ] Use the `searchTypeScriptDocs` function with the generated keywords
+- [ ] Use the `searchEmails` function with the generated keywords
   - Wait for the complete keywords object to be available
   - Select the top most relevant search results (decide how many - 5 to 10 is typical)
   - Use array slicing to get the top results
 
 - [ ] Test your implementation by running the local dev server
-  - Try asking different TypeScript questions to see if the assistant returns relevant documentation
+  - Try asking different questions about emails to see if the assistant returns relevant emails
   - Check if the keyword queries are displayed correctly in the UI
-  - Verify that the responses include citations from TypeScript documentation files
+  - Verify that the responses include citations from email subjects

@@ -1,43 +1,46 @@
 import BM25 from 'okapibm25';
 import path from 'path';
-import { readdir, readFile } from 'fs/promises';
+import { readFile } from 'fs/promises';
 
-export const loadTsDocs = async () => {
-  const TS_DOCS_LOCATION = path.resolve(
-    import.meta.dirname,
-    '../../../../../datasets/ts-docs',
-  );
-
-  const files = await readdir(TS_DOCS_LOCATION);
-
-  const docs = await Promise.all(
-    files.map(async (file) => {
-      const filePath = path.join(TS_DOCS_LOCATION, file);
-      const content = await readFile(filePath, 'utf8');
-      return {
-        filename: file,
-        content,
-      };
-    }),
-  );
-
-  return docs;
+export type Email = {
+  id: string;
+  from: string;
+  to: string;
+  subject: string;
+  body: string;
+  timestamp: string;
+  threadId?: string;
+  inReplyTo?: string;
+  references?: string[];
+  labels?: string[];
+  arcId?: string;
+  phaseId?: number;
 };
 
-export const searchTypeScriptDocs = async (
-  keywords: string[],
-) => {
-  const docs = await loadTsDocs();
+export const loadEmails = async () => {
+  const EMAILS_LOCATION = path.resolve(
+    import.meta.dirname,
+    '../../../../../datasets/emails.json',
+  );
+
+  const content = await readFile(EMAILS_LOCATION, 'utf8');
+  const emails: Email[] = JSON.parse(content);
+
+  return emails;
+};
+
+export const searchEmails = async (keywords: string[]) => {
+  const emails = await loadEmails();
 
   const scores: number[] = (BM25 as any)(
-    docs.map((doc) => doc.content),
+    emails.map((email) => `${email.subject} ${email.body}`),
     keywords,
   );
 
   return scores
     .map((score, index) => ({
       score,
-      doc: docs[index],
+      email: emails[index],
     }))
     .sort((a, b) => b.score - a.score);
 };
