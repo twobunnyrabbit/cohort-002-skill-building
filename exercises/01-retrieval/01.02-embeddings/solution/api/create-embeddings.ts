@@ -1,29 +1,34 @@
 import path from 'path';
-import { readdir, readFile, writeFile } from 'fs/promises';
+import { readFile, writeFile } from 'fs/promises';
 import { cosineSimilarity, embed, embedMany } from 'ai';
 import { google } from '@ai-sdk/google';
 import { existsSync } from 'fs';
 
-export const loadTsDocs = async () => {
-  const TS_DOCS_LOCATION = path.resolve(
+export type Email = {
+  id: string;
+  from: string;
+  to: string;
+  subject: string;
+  body: string;
+  timestamp: string;
+  threadId?: string;
+  inReplyTo?: string;
+  references?: string[];
+  labels?: string[];
+  arcId?: string;
+  phaseId?: number;
+};
+
+export const loadEmails = async () => {
+  const EMAILS_LOCATION = path.resolve(
     import.meta.dirname,
-    '../../../../../datasets/ts-docs',
+    '../../../../../datasets/emails.json',
   );
 
-  const files = await readdir(TS_DOCS_LOCATION);
+  const content = await readFile(EMAILS_LOCATION, 'utf8');
+  const emails: Email[] = JSON.parse(content);
 
-  const docs = await Promise.all(
-    files.map(async (file) => {
-      const filePath = path.join(TS_DOCS_LOCATION, file);
-      const content = await readFile(filePath, 'utf8');
-      return {
-        filename: file,
-        content,
-      };
-    }),
-  );
-
-  return new Map(docs.map((doc) => [doc.filename, doc]));
+  return emails;
 };
 
 export type Embeddings = Record<string, number[]>;
@@ -70,10 +75,10 @@ const myEmbeddingModel = google.textEmbeddingModel(
   'text-embedding-004',
 );
 
-export const embedTsDocs = async (
+export const embedEmails = async (
   cacheKey: string,
 ): Promise<Embeddings> => {
-  const docs = await loadTsDocs();
+  const emails = await loadEmails();
 
   const existingEmbeddings =
     await getExistingEmbeddings(cacheKey);
@@ -83,13 +88,12 @@ export const embedTsDocs = async (
   }
 
   const embeddings: Embeddings = {};
-  const docValues = Array.from(docs.values());
 
   // Chunk the values into batches of 99
   const chunkSize = 99;
   const chunks = [];
-  for (let i = 0; i < docValues.length; i += chunkSize) {
-    chunks.push(docValues.slice(i, i + chunkSize));
+  for (let i = 0; i < emails.length; i += chunkSize) {
+    chunks.push(emails.slice(i, i + chunkSize));
   }
 
   // Process each chunk sequentially
@@ -98,7 +102,7 @@ export const embedTsDocs = async (
     const embedManyResult = await embedLotsOfText(chunk);
 
     embedManyResult.forEach((embedding) => {
-      embeddings[embedding.filename] = embedding.embedding;
+      embeddings[embedding.id] = embedding.embedding;
     });
 
     processedCount += chunk.length;
@@ -109,7 +113,7 @@ export const embedTsDocs = async (
   return embeddings;
 };
 
-export const searchTypeScriptDocs = async (query: string) => {
+export const searchEmails = async (query: string) => {
   const embeddings =
     await getExistingEmbeddings(EMBED_CACHE_KEY);
 
@@ -118,7 +122,8 @@ export const searchTypeScriptDocs = async (query: string) => {
       `Embeddings not yet created under this cache key: ${EMBED_CACHE_KEY}`,
     );
   }
-  const docs = await loadTsDocs();
+  const emails = await loadEmails();
+  const emailsMap = new Map(emails.map((email) => [email.id, email]));
 
   const queryEmbedding = await embedOnePieceOfText(query);
 
@@ -126,8 +131,7 @@ export const searchTypeScriptDocs = async (query: string) => {
     ([key, value]) => {
       return {
         score: calculateScore(queryEmbedding, value),
-        filename: key,
-        content: docs.get(key)!.content,
+        email: emailsMap.get(key)!,
       };
     },
   );
@@ -135,26 +139,24 @@ export const searchTypeScriptDocs = async (query: string) => {
   return scores.sort((a, b) => b.score - a.score);
 };
 
-export const EMBED_CACHE_KEY = 'ts-docs-google';
+export const EMBED_CACHE_KEY = 'emails-google';
 
 const embedLotsOfText = async (
-  documents: { filename: string; content: string }[],
+  emails: Email[],
 ): Promise<
   {
-    filename: string;
-    content: string;
+    id: string;
     embedding: number[];
   }[]
 > => {
   const result = await embedMany({
     model: myEmbeddingModel,
-    values: documents.map((doc) => doc.content),
+    values: emails.map((email) => `${email.subject} ${email.body}`),
     maxRetries: 0,
   });
 
   return result.embeddings.map((embedding, index) => ({
-    filename: documents[index]!.filename,
-    content: documents[index]!.content,
+    id: emails[index]!.id,
     embedding,
   }));
 };
