@@ -203,6 +203,17 @@
 - Foundation for synthetic dataset generation in 06.02
 - Quantify extraction accuracy, catch regressions when changing prompts/models
 
+### [06.02 - Creating Memory Tool Evaluation Dataset](./exercises/06-evals-project-work/06.02-creating-memory-tool-evaluation-dataset/explainer/notes.md) (Explainer)
+
+- Generate synthetic test cases using `generateObject` with operation-specific prompts
+- Separate generation (`generate-dataset.ts`) from evaluation (`main.ts`) for consistent testing
+- 4 operation types: create (new info), update (contradictions), delete (forget requests), no-action (casual chat)
+- Reusable generator function produces 8 cases per operation (32 total)
+- Test case schema: conversation turns + existing memories + expected operations
+- 4 separate Evalite suites with operation-specific scorers
+- Scale from 5 manual cases (06.01) to 32 synthetic cases
+- Identify which memory operations have low accuracy for prompt tuning
+
 ## Section 07: Human-in-the-Loop Skill Building
 
 ### [07.01 - HITL Intro](./exercises/07-human-in-the-loop-skill-building/07.01-hitl-intro/explainer/readme.md) (Explainer)
