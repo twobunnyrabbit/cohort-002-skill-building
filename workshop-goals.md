@@ -225,6 +225,18 @@
 - Focus on mechanism quality, not agent output
 - Catch regressions when changing search implementation or tuning parameters
 
+### [06.04 - Comparing Semantic Search with Agentic Search](./exercises/06-evals-project-work/06.04-comparing-semantic-search-with-agentic-search/explainer/notes.md) (Explainer)
+
+- Comparative evaluation using `evalite.each` for variant comparison
+- Experiment-driven testing: treat eval as experiment comparing two approaches
+- Semantic search variant: upfront retrieval (BM25 + embeddings + RRF) then answer
+- Agentic search variant: LLM uses tools (searchSemanticEmails, filterEmails, getEmailById)
+- Test cases focus on answer correctness, not retrieval quality
+- Manual answer inspection (defer LLM-as-judge scorer to next lesson)
+- Edge cases expose boundaries: multi-hop queries, filtering needs, thread following, simple facts
+- Identify when agents excel (complex multi-step) vs RAG sufficient (simple lookups)
+- Experimental mindset: discover approach strengths/weaknesses through systematic comparison
+
 ## Section 07: Human-in-the-Loop Skill Building
 
 ### [07.01 - HITL Intro](./exercises/07-human-in-the-loop-skill-building/07.01-hitl-intro/explainer/readme.md) (Explainer)
