@@ -258,6 +258,7 @@
 - Pause execution for human review before performing actions
 - User approval/rejection flow with feedback mechanism
 - Prevent LLM from executing high-impact actions without confirmation
+- Why build HITL yourself: enables extensions like thread-scoped permissions (see 08.03)
 
 ### [07.02 - Initiating HITL Requests](./exercises/07-human-in-the-loop-skill-building/07.02-initiating-hitl-requests/problem/readme.md) (Problem)
 

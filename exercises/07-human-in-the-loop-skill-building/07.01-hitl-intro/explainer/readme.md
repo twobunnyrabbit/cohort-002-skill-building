@@ -8,6 +8,12 @@ Ideally, we want to hand over quite a lot of power to the LLM to make it more us
 
 That's what human in the loop does. It adds human checks into the loop to make sure that the LLM is always on task.
 
+## Why Build It Yourself?
+
+AI SDK has first-class HITL support. So why build from scratch?
+
+Understanding internals enables powerful extensions. Lesson 08.03 shows thread-scoped permissions - approving a tool once grants access for entire conversation. First-class solutions don't provide this. Building yourself = control over approval flows, permission models, custom behaviors.
+
 ## Custom Data Parts
 
 We're going to be building a human in the loop system with the AI SDK's custom data parts.

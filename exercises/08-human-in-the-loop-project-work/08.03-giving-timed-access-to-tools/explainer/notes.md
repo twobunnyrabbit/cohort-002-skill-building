@@ -1,5 +1,9 @@
 # Giving Timed Access to Tools
 
+## Why This Matters
+
+This lesson demonstrates value of building HITL yourself (Section 7). Custom implementation enables extensions like thread-scoped permissions. AI SDK's first-class HITL doesn't provide this flexibility. Understanding internals = power to adapt approval flows to your needs.
+
 ## Learning Goals
 
 - Implement permission system for thread-scoped tool access
