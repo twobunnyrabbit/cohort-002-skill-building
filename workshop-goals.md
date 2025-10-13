@@ -237,6 +237,18 @@
 - Identify when agents excel (complex multi-step) vs RAG sufficient (simple lookups)
 - Experimental mindset: discover approach strengths/weaknesses through systematic comparison
 
+### [06.05 - LLM-as-Judge Scorer](./exercises/06-evals-project-work/06.05-llm-as-judge-scorer/explainer/notes.md) (Explainer)
+
+- Scale lesson 6.4 experiment with automated scoring via LLM-as-judge
+- Implement factuality scorer comparing generated vs expected answers (inspired by Braintrust)
+- Multiple-choice verdict format: subset (0.4), superset (0.6), exact (1.0), disagreement (0.0), equivalent (1.0)
+- Request reasoning before verdict for transparency and accuracy
+- Integrate scorer into `evalite.each` from lesson 6.4
+- Validate LLM judge decisions via spot-checking 5-10 cases
+- Scale test dataset to 20-50 cases now that scoring is automated
+- Understand tradeoffs: cost vs scalability, consistency vs human judgment
+- Prompt engineering best practices: multiple-choice format, low temperature, clear rubric
+
 ## Section 07: Human-in-the-Loop Skill Building
 
 ### [07.01 - HITL Intro](./exercises/07-human-in-the-loop-skill-building/07.01-hitl-intro/explainer/readme.md) (Explainer)
