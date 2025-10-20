@@ -129,7 +129,7 @@
 
 ### [03.05 - Reranking](./exercises/03-retrieval-day-2-skill-building/03.05-reranking/problem/readme.md) (Problem)
 
-- Post-retrieval filtering via reranker LLM (moved from Section 01)
+- Post-retrieval filtering via reranker LLM
 - Pass top 30 chunk results to reranker, return most relevant IDs only
 - Token optimization: return IDs not full content
 - Format chunks with IDs for LLM evaluation
@@ -138,6 +138,8 @@
 - Applies reranking to chunked retrieval results
 
 ## Section 04: Retrieval Day 2 Project Work
+
+_placeholder_
 
 ## Section 05: Memory Skill Building
 
