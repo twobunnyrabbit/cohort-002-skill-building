@@ -4,7 +4,7 @@
 
 Workshop includes pre-built email datasets:
 
-- **Small**: `datasets/emails.json` (75 emails) - good for learning
+- **Small**: `datasets/emails.json` (150 emails) - good for learning
 - **Large**: `ai-personal-assistant/data/emails.json` (547 emails) - realistic scale
 
 Skip this exercise if using pre-built.

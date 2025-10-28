@@ -87,12 +87,12 @@
 
 ### [02.03 - Adding Search Tool to Agent](./exercises/02-retrieval-project-work/02.03-adding-search-tool-to-agent/explainer/notes.md) (Explainer)
 
-- Build chat API route with `createUIMessageStream` for agent-driven search
-- Build `searchSemanticEmails` tool using lesson 2.2 algorithm (BM25 + embeddings + RRF)
-- Agent generates keywords + search query via tool parameters
-- Configure `stopWhen: stepCountIs(5)` for multi-tool workflows
-- Apply Anthropic prompt template: task context → background data → rules → the ask
-- Stream conversational answers based on retrieved email context
+- Transform lesson 2.2 search algorithm into agent-controlled `searchSemanticEmails` tool
+- Tool accepts separate `keywords` (BM25) and `searchQuery` (embeddings) params matching query rewriter pattern
+- Agent autonomously generates both params, calls tool, receives top 10 emails with full content
+- Configure `stopWhen: stepCountIs(5)` for multi-step workflows - agent calls tool then processes results
+- Apply Anthropic prompt template structure: task context → background data → rules → the ask
+- Stream conversational answers based on retrieved context with markdown source citations
 
 ## Section 03: Retrieval Day 2 Skill Building
 

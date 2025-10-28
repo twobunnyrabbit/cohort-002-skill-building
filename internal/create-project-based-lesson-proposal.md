@@ -7,13 +7,13 @@ Create a lesson proposal.
 <course-intent>
 The idea of the course is to teach you how to build an AI personal assistant using the AI SDK.
 
-There are two repositories - this one, and ../ai-personal-assistant.
+There are two repositories - this one, and ../cohort-002-project repository.
 
 Some sections of the course are skill building sections, and some are project work sections.
 
 The skill building sections are exercises that are designed to teach you a specific skill. They are taught in this repo.
 
-The project work sections are exercises that are designed to apply the skills you've learned in the skill building sections. The instructions for the project work are here, but the codebase is in the ../ai-personal-assistant repository.
+The project work sections are exercises that are designed to apply the skills you've learned in the skill building sections. The instructions for the project work are here, but the codebase is in the ../cohort-002-project repository.
 </course-intent>
 </background-data>
 
@@ -43,7 +43,7 @@ This should be detailed, but still concise. Another AI should be able to read th
 </lesson-proposal-format>
 
 <task>
-1. Load the relevant parts of the ../ai-personal-assistant repository into your context.
+1. Load the relevant parts of the ../cohort-002-project repository into your context.
 2. Create a lesson proposal inside the folder of the section you're working on, under `notes.md`.
 3. Once the lesson proposal is done, update @workshop-goals.md with the new information.
 </task>
