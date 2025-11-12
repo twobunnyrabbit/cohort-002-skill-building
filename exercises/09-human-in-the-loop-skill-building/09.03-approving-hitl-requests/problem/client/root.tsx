@@ -28,8 +28,8 @@ const App = () => {
     useState<Action | null>(null);
 
   return (
-    <Wrapper>
-      {messages.map((message) => (
+    <Wrapper
+      messages={messages.map((message) => (
         <Message
           key={message.id}
           role={message.role}
@@ -46,24 +46,26 @@ const App = () => {
           }}
         />
       ))}
-      <ChatInput
-        isGivingFeedback={!!actionGivingFeedbackOn}
-        input={input}
-        onChange={(e) => setInput(e.target.value)}
-        onSubmit={(e) => {
-          e.preventDefault();
+      input={
+        <ChatInput
+          isGivingFeedback={!!actionGivingFeedbackOn}
+          input={input}
+          onChange={(e) => setInput(e.target.value)}
+          onSubmit={(e) => {
+            e.preventDefault();
 
-          // TODO: if the user is giving feedback on an action,
-          // send a data-action-decision part with the action ID
-          // and the reason for the rejection.
+            // TODO: if the user is giving feedback on an action,
+            // send a data-action-decision part with the action ID
+            // and the reason for the rejection.
 
-          sendMessage({
-            text: input,
-          });
-          setInput('');
-        }}
-      />
-    </Wrapper>
+            sendMessage({
+              text: input,
+            });
+            setInput('');
+          }}
+        />
+      }
+    />
   );
 };
 

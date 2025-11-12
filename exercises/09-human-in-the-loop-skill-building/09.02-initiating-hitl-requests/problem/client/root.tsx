@@ -13,26 +13,28 @@ const App = () => {
   );
 
   return (
-    <Wrapper>
-      {messages.map((message) => (
+    <Wrapper
+      messages={messages.map((message) => (
         <Message
           key={message.id}
           role={message.role}
           parts={message.parts}
         />
       ))}
-      <ChatInput
-        input={input}
-        onChange={(e) => setInput(e.target.value)}
-        onSubmit={(e) => {
-          e.preventDefault();
-          sendMessage({
-            text: input,
-          });
-          setInput('');
-        }}
-      />
-    </Wrapper>
+      input={
+        <ChatInput
+          input={input}
+          onChange={(e) => setInput(e.target.value)}
+          onSubmit={(e) => {
+            e.preventDefault();
+            sendMessage({
+              text: input,
+            });
+            setInput('');
+          }}
+        />
+      }
+    />
   );
 };
 

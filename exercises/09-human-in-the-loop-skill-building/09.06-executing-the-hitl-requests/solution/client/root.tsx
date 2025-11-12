@@ -30,8 +30,8 @@ const App = () => {
     useState<Action | null>(null);
 
   return (
-    <Wrapper>
-      {messages.map((message) => (
+    <Wrapper
+      messages={messages.map((message) => (
         <Message
           key={message.id}
           role={message.role}
@@ -59,39 +59,41 @@ const App = () => {
           }}
         />
       ))}
-      <ChatInput
-        isGivingFeedback={!!actionGivingFeedbackOn}
-        input={input}
-        onChange={(e) => setInput(e.target.value)}
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (actionGivingFeedbackOn) {
-            sendMessage({
-              parts: [
-                {
-                  type: 'data-action-decision',
-                  data: {
-                    actionId: actionGivingFeedbackOn.id,
-                    decision: {
-                      type: 'reject',
-                      reason: input,
+      input={
+        <ChatInput
+          isGivingFeedback={!!actionGivingFeedbackOn}
+          input={input}
+          onChange={(e) => setInput(e.target.value)}
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (actionGivingFeedbackOn) {
+              sendMessage({
+                parts: [
+                  {
+                    type: 'data-action-decision',
+                    data: {
+                      actionId: actionGivingFeedbackOn.id,
+                      decision: {
+                        type: 'reject',
+                        reason: input,
+                      },
                     },
                   },
-                },
-              ],
-            });
+                ],
+              });
 
-            setActionGivingFeedbackOn(null);
+              setActionGivingFeedbackOn(null);
+              setInput('');
+              return;
+            }
+            sendMessage({
+              text: input,
+            });
             setInput('');
-            return;
-          }
-          sendMessage({
-            text: input,
-          });
-          setInput('');
-        }}
-      />
-    </Wrapper>
+          }}
+        />
+      }
+    />
   );
 };
 
