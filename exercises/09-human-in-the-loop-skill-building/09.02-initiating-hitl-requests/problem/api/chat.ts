@@ -10,13 +10,20 @@ import {
 import z from 'zod';
 import { sendEmail } from './email-service.ts';
 
+export type ToolRequiringApproval = {
+  id: string;
+  type: 'send-email';
+  content: string;
+  to: string;
+  subject: string;
+};
+
 export type MyMessage = UIMessage<
   unknown,
   {
-    // TODO: declare an approval-request data part that
-    // contains the tool that will be called, including
-    // its id, type, to, subject, and content.
-    'approval-request': TODO;
+    'approval-request': {
+      tool: ToolRequiringApproval;
+    };
   }
 >;
 

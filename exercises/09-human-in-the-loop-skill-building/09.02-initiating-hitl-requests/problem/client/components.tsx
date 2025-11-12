@@ -58,8 +58,41 @@ export const Message = ({
               );
             }
 
-            // TODO: if the part is a data-approval-request,
-            // render a preview of the email that will be sent
+            if (part.type === 'data-approval-request') {
+              return (
+                <div key={part.id} className="mb-4">
+                  <h2 className="text-sm font-medium mb-2">
+                    I'm requesting to send an email:
+                  </h2>
+                  <div className="bg-card border border-border rounded-lg p-4 space-y-2">
+                    <div>
+                      <span className="text-xs text-muted-foreground">
+                        To:
+                      </span>
+                      <span className="text-sm ml-2">
+                        {part.data.tool.to}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-xs text-muted-foreground">
+                        Subject:
+                      </span>
+                      <span className="text-sm ml-2">
+                        {part.data.tool.subject}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-xs text-muted-foreground">
+                        Content:
+                      </span>
+                      <div className="text-sm mt-1 p-2 bg-muted border-l-2 border-primary rounded">
+                        {part.data.tool.content}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
 
             return null;
           })}
