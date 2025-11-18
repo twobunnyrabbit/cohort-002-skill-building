@@ -2,7 +2,7 @@ Getting insights about how your system performs is great. But the real power com
 
 One way to make those smarter decisions is to A/B test different approaches. [Evalite](/PLACEHOLDER/evalite) has a feature called [`evalite.each()`](/PLACEHOLDER/evalite-each) that lets you run the same task with different variants to compare their performance.
 
-In this case, you're going to test your agent with different language models to see which one gives you the best results at the lowest cost. The agent is the same, but the model changes—so you can directly compare how models like Gemini Flash Lite, Gemini 2.5 Flash, and GPT-4o mini stack up against each other.
+In this case, you're going to test your agent with different language models to see which one gives you the best results at the lowest cost. The agent stays the same, but the model changes—so you can directly compare how models like Gemini Flash Lite, Gemini 2.0 Flash, and GPT-4o mini stack up against each other.
 
 ## Steps To Complete
 
@@ -42,11 +42,11 @@ task: async (messages, model) => {
 
 - [ ] Add at least 2-3 more models to the [`evalite.each()`](/PLACEHOLDER/evalite-each) array to compare different LLM performance
 
-You might try:
+Consider testing these options:
 
-- [`google('gemini-2.0-flash-lite')`](/PLACEHOLDER/google-gemini-2.0-flash-lite) - a lighter, cheaper Gemini model
-- [`google('gemini-1.5-flash')`](/PLACEHOLDER/google-gemini-1.5-flash) - an earlier version of Gemini
-- Models from other providers like OpenAI or Anthropic
+- [`google('gemini-2.0-flash-lite')`](/PLACEHOLDER/google-gemini-2.0-flash-lite) - A lighter, cheaper Gemini model
+- [`google('gemini-1.5-flash')`](/PLACEHOLDER/google-gemini-1.5-flash) - An earlier version of Gemini
+- Models from other providers like [OpenAI](/PLACEHOLDER/openai-models) or [Anthropic](/PLACEHOLDER/anthropic-models)
 
 Here's how to add another model variant:
 
@@ -57,8 +57,8 @@ evalite.each([
     input: google('gemini-2.0-flash'),
   },
   {
-    name: 'Your New Model Here',
-    input: google('gemini-2.0-flash-lite'), // or another model
+    name: 'Gemini 2.0 Flash Lite',
+    input: google('gemini-2.0-flash-lite'),
   },
 ]);
 ```
@@ -69,9 +69,9 @@ Check the [AI SDK documentation](/PLACEHOLDER/ai-sdk-models) for available model
 
 - [ ] Consider adding a few more test cases to the `data` array to get a better picture of model performance
 
-More test cases = better evaluation, but watch out—evals can get expensive quickly, especially in watch mode.
+More test cases means better evaluation results. But watch out—evals can get expensive quickly, especially in watch mode.
 
-The existing test cases are:
+The existing test cases look like this:
 
 ```ts
 data: [
@@ -107,7 +107,7 @@ Look at which model gives you the best results for the lowest cost.
 
 - [ ] Check the terminal output to see the evaluation results for all model variants
 
-You should see something like:
+You should see output similar to this:
 
 ```txt
 Gemini 2.0 Flash: 5/5 (100%)

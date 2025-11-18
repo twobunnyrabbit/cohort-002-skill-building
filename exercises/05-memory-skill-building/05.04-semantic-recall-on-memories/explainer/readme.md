@@ -2,23 +2,25 @@ Our memory system is growing, but we've hit a critical problem. We're loading _e
 
 Think about it: if you're asking about your favorite drinks, you don't need memories about your childhood hometown cluttering up the context. You need the system to be smart about which memories matter _right now_.
 
-This is where retrieval comes back into play. Just like we learned earlier, we need to search through our memories semantically and return only the most relevant ones.
+This is where [retrieval](/PLACEHOLDER/retrieval-augmented-generation) comes back into play. Just like we learned earlier, we need to search through our memories semantically and return only the most relevant ones.
 
 ## Steps To Complete
 
-### Understanding The Problem With Loading All Memories
+### Understand The Problem With Loading All Memories
 
 - [ ] Review how the previous approach loaded memories
-  - The old system used `loadMemories()` which fetches every single memory from the database
-  - All memories were added to the system prompt, regardless of relevance
+
+The old system used [`loadMemories()`](/PLACEHOLDER/load-memories) which fetches every single memory from the database. All memories were added to the system prompt, regardless of relevance.
 
 - [ ] Consider the scalability issue
-  - As the memory database grows to hundreds or thousands of items, passing all of them to the LLM becomes wasteful
-  - This pollutes the context window with irrelevant information
 
-### How Query Rewriting Works
+As the memory database grows to hundreds or thousands of items, passing all of them to the [LLM](/PLACEHOLDER/large-language-models) becomes wasteful. This pollutes the [context window](/PLACEHOLDER/context-window) with irrelevant information.
+
+### Understand How Query Rewriting Works
 
 - [ ] Look at the query rewriter in `api/chat.ts`
+
+The query rewriter analyzes the conversation history to understand what information the user is asking about. It generates `keywords` for exact keyword matching and a `searchQuery` for semantic search.
 
 ```ts
 const queryRewriterResult = await generateObject({
@@ -40,14 +42,15 @@ const queryRewriterResult = await generateObject({
 });
 ```
 
-- [ ] Understand what the query rewriter does
-  - It analyzes the conversation history to understand what information the user is asking about
-  - It generates `keywords` for exact keyword matching (used by BM25 search)
-  - It generates a `searchQuery` for semantic/embedding-based search
+- [ ] Understand what the query rewriter produces
 
-### How Hybrid Search Retrieves Memories
+It generates `keywords` for [BM25 search](/PLACEHOLDER/bm25-search) (exact keyword matching). It generates a `searchQuery` for [embedding](/PLACEHOLDER/embeddings)-based search (semantic similarity).
+
+### See How Hybrid Search Retrieves Memories
 
 - [ ] Examine how the results are retrieved in `api/chat.ts`
+
+The `searchMemories()` function combines two retrieval methods: [embeddings](/PLACEHOLDER/embeddings) for semantic similarity and [BM25](/PLACEHOLDER/bm25-search) for keyword matching.
 
 ```ts
 const foundMemories = await searchMemories({
@@ -61,16 +64,15 @@ const formattedMemories = foundMemories
   .join('\n\n');
 ```
 
-- [ ] Notice how `searchMemories()` combines two retrieval methods
-  - It searches using embeddings for semantic similarity
-  - It searches using BM25 for keyword matching
-  - It uses reciprocal rank fusion to combine the results
+- [ ] Notice how only the top 4 memories are used
 
-- [ ] See how only the top 4 memories are used
-  - The `.slice(0, 4)` ensures we don't bloat the context window
-  - These are the most relevant memories for the current query
+The `.slice(0, 4)` ensures we don't bloat the [context window](/PLACEHOLDER/context-window). These are the most relevant memories for the current query.
 
-### Testing The Selective Retrieval
+- [ ] Understand reciprocal rank fusion
+
+The `searchMemories()` function uses [reciprocal rank fusion](/PLACEHOLDER/reciprocal-rank-fusion) to combine the results from both retrieval methods.
+
+### Test The Selective Retrieval
 
 - [ ] Run the application with `pnpm run dev`
 
@@ -81,7 +83,8 @@ const formattedMemories = foundMemories
 - [ ] Answer several questions to build up memories
 
 - [ ] Ask a specific follow-up question like "What do I like drinking?"
-  - Look at the server console to see the query rewriter output
+
+Look at the server console to see the query rewriter output:
 
 ```txt
 {
@@ -91,21 +94,17 @@ const formattedMemories = foundMemories
 ```
 
 - [ ] Observe which memories appear in the context
-  - Only memories related to drinks and beverages should be retrieved
-  - Unrelated memories about your location or work are filtered out
 
-### Understanding The Pattern
+Only memories related to drinks and beverages should be retrieved. Unrelated memories about your location or work are filtered out.
 
-- [ ] Recognize that this is a common pattern in memory systems
-  - As memory databases grow larger, selective retrieval becomes essential
-  - Every memory system needs a way to winnow down which information reaches the LLM
+### Recognize The Pattern
 
-- [ ] Consider why this matters
-  - Prevents context pollution from irrelevant information
-  - Scales better as the memory database grows
-  - Focuses the LLM's attention on what actually matters for the current conversation
+- [ ] Understand why this pattern matters
+
+As memory databases grow larger, selective retrieval becomes essential. Every memory system needs a way to winnow down which information reaches the LLM.
+
+This prevents [context pollution](/PLACEHOLDER/context-window) from irrelevant information. It scales better as the memory database grows. It focuses the LLM's attention on what actually matters for the current conversation.
 
 - [ ] Explore how this could be extended
-  - A re-ranking step could further refine the results
-  - Multiple retrieval methods could run in parallel
-  - Different weighting could be applied to different memory types
+
+A [re-ranking](/PLACEHOLDER/reranking-concept) step could further refine the results. Multiple retrieval methods could run in parallel. Different weighting could be applied to different memory types.

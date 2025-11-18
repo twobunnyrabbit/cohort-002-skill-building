@@ -1,23 +1,34 @@
-Personal assistants need to truly understand who you are. They need to know your preferences, habits, and important details about your life. An LLM system that learns and retains this information is a long-term goal for many AI applications.
+# Building a Memory System for Personal Assistants
 
-The [AI SDK](https://sdk.vercel.ai/) provides all the primitives you need to build a memory system. However, the real challenge is in the implementation details. Let's start with a simple memory setup that loads existing memories and extracts new ones from conversations.
+Personal assistants need to truly understand who you are. They need to know your preferences, habits, and important details about your life.
+
+An [LLM system](/PLACEHOLDER/llm-systems) that learns and retains this information is a long-term goal for many AI applications. It's an area of extremely active research.
+
+The [AI SDK](/PLACEHOLDER/ai-sdk) provides all the primitives you need to build a memory system. However, the real challenge is in the implementation details.
 
 In this exercise, you'll build the foundational pieces: loading memories from a database, displaying them to the model, and extracting new permanent memories from each conversation.
 
 ## Steps To Complete
 
-- [ ] Understand that building a personal assistant requires a memory system to learn user preferences and information over time
-  - Memory systems allow LLMs to retain information about users across conversations
-  - This is an area of active research with many potential applications
+### Understanding Memory Systems
+
+- [ ] Understand why personal assistants need memory systems
+
+Memory systems allow [LLMs](/PLACEHOLDER/large-language-models) to retain information about users across conversations. This enables:
+
+- Learning user preferences and habits over time
+- Providing personalized assistance
+- Building trust through demonstrated understanding
 
 ### Loading Memories From The Database
 
-- [ ] Review the code structure in `api/chat.ts` and locate the POST route handler
-  - This is where incoming chat messages are processed
-  - The system prompt currently has a placeholder for memories in XML tags
+- [ ] Review the code structure in `api/chat.ts`
 
-- [ ] Load memories from the database in the POST route
-  - Notice that `loadMemories` and `saveMemories` are already imported at the top of the file
+Look at the POST route handler where incoming chat messages are processed. The system prompt currently has a placeholder for memories in XML tags.
+
+- [ ] Locate the imported memory functions
+
+The [`loadMemories`](/PLACEHOLDER/load-memories) and [`saveMemories`](/PLACEHOLDER/save-memories) functions are already imported:
 
 ```ts
 import {
@@ -27,8 +38,9 @@ import {
 } from './memory-persistence.ts';
 ```
 
-- Use the `loadMemories()` function to fetch memories from the database
-- Store the result in a variable (replace the TODO comment)
+- [ ] Load memories from the database in the POST route
+
+Use the [`loadMemories()`](/PLACEHOLDER/load-memories) function to fetch memories from the database and store the result in a variable:
 
 ```ts
 // TODO: Use the loadMemories function to load the memories from the database
@@ -37,8 +49,9 @@ const memories = await loadMemories();
 
 ### Formatting Memories For The System Prompt
 
-- [ ] Review the `formatMemory()` function that's already defined in the file
-  - This function takes a single memory item and formats it nicely for display
+- [ ] Review the `formatMemory()` function
+
+This function takes a single memory item and formats it nicely for display:
 
 ```ts
 const formatMemory = (memory: DB.MemoryItem) => {
@@ -49,10 +62,9 @@ const formatMemory = (memory: DB.MemoryItem) => {
 };
 ```
 
-- [ ] Format the loaded memories for display in the system prompt
-  - Use the `formatMemory()` function to format each memory item
-  - Map over the memories array and join them with newlines
-  - Store the result in the `memoriesText` variable (replace the TODO comment)
+- [ ] Format the loaded memories for the system prompt
+
+Use the `formatMemory()` function to format each memory item and join them together. Store the result in the `memoriesText` variable:
 
 ```ts
 // TODO: Format the memories to display in the UI using the formatMemory function
@@ -61,9 +73,13 @@ const memoriesText = memories.map(formatMemory).join('\n\n');
 
 ### Extracting New Memories
 
-- [ ] Understand the memory extraction process that happens after each response
-  - The `onFinish` callback runs after the model responds
-  - This is where new memories should be extracted and saved
+- [ ] Understand the memory extraction process
+
+The [`onFinish`](/PLACEHOLDER/on-finish) callback runs after the model responds. This is where new memories are extracted and saved.
+
+- [ ] Generate new memories from the conversation
+
+Use [`generateObject()`](/PLACEHOLDER/generate-object) to analyze the full conversation and extract memories. Pass it the entire [message history](/PLACEHOLDER/message-history) and existing memories:
 
 ```ts
 onFinish: async (response) => {
@@ -81,14 +97,11 @@ onFinish: async (response) => {
 },
 ```
 
-- [ ] Generate new memories from the conversation using `generateObject()`
-  - Locate the TODO in the `onFinish` callback
-  - Create an array of all messages (user messages + assistant response)
-  - Use `generateObject()` to analyze the full conversation and extract memories
+Write a system prompt that focuses on permanent memories about the user - their attributes, preferences, and long-term information. Avoid temporary or situational details.
 
 - [ ] Extract the memories from the result object
-  - After `generateObject()` completes, access the memories array
-  - This is stored in `memoriesResult.object.memories`
+
+After [`generateObject()`](/PLACEHOLDER/generate-object) completes, access the memories array stored in `memoriesResult.object.memories`:
 
 ```ts
 const newMemories = memoriesResult.object.memories;
@@ -96,19 +109,17 @@ const newMemories = memoriesResult.object.memories;
 
 ### Saving And Logging Memories
 
-- [ ] Add a console log to see the extracted memories as they're created
-  - Log the `newMemories` array so you can track what's being saved
-  - This helps verify the memory extraction is working correctly
+- [ ] Add a console log to track extracted memories
+
+Log the `newMemories` array so you can see what's being saved:
 
 ```ts
 console.log('newMemories', newMemories);
 ```
 
 - [ ] Save the extracted memories to the database
-  - Create memory objects with required fields: `id`, `memory`, and `createdAt`
-  - Use `generateId()` for each memory's id
-  - Use `new Date().toISOString()` for the timestamp
-  - Call `saveMemories()` to persist them to the database
+
+Create memory objects with the required fields: `id`, `memory`, and `createdAt`. Use [`generateId()`](/PLACEHOLDER/generate-id) for each memory's ID and `new Date().toISOString()` for the timestamp:
 
 ```ts
 const newMemories = memoriesResult.object.memories;
@@ -123,18 +134,25 @@ saveMemories(
 
 ### Testing The Memory System
 
-- [ ] Run the application with `pnpm run dev`
-  - The dev server will start and be available at `localhost:3000`
+- [ ] Run the application
 
-- [ ] Open `localhost:3000` in your browser
-  - You should see the chat interface with the pre-filled message "Interview me about my life and work. Ask one question at a time."
+Start the dev server with the command:
 
-- [ ] Send the initial message and observe the conversation
-  - The assistant will ask you questions about your life and work
-  - Answer the questions to provide material for memory extraction
+```bash
+pnpm run dev
+```
+
+- [ ] Open the chat interface
+
+Navigate to `localhost:3000` in your browser. You should see the chat interface with the pre-filled message: "Interview me about my life and work. Ask one question at a time."
+
+- [ ] Send the initial message
+
+Send the pre-filled message and observe the conversation. The assistant will ask you questions about your life and work. Answer the questions to provide material for memory extraction.
 
 - [ ] Check the server console for memory extraction logs
-  - Look for output like this showing what memories were extracted:
+
+Look for output showing what memories were extracted:
 
 ```txt
 newMemories [
@@ -144,10 +162,9 @@ newMemories [
 ]
 ```
 
-- [ ] Inspect the generated `data/memories.local.json` file
-  - After several exchanges, navigate to the `data` directory
-  - Open `memories.local.json` to see the stored memories
-  - The file should look something like this:
+- [ ] Inspect the generated memories file
+
+Navigate to the `data` directory and open `memories.local.json`. After several exchanges, the file should contain extracted memories:
 
 ```json
 {
@@ -176,7 +193,10 @@ newMemories [
 }
 ```
 
-- [ ] Test the memory system with multiple conversations
-  - Have several exchanges with the assistant
-  - Check that new memories are added to the database
-  - Verify that memories persist across new conversations (the assistant should reference them in the system prompt)
+- [ ] Test memory persistence across conversations
+
+Have several exchanges with the assistant. Check that:
+
+- New memories are added to the database
+- Memories persist across new conversations
+- The assistant references stored memories in its [system prompt](/PLACEHOLDER/system-prompt)

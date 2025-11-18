@@ -1,6 +1,6 @@
-Right now, your evaluation dataset is all sunshine and roses. Every test case has the user explicitly telling the agent exactly what they want and which tool to use. But real users are usually less straightforward.
+Right now, your evaluation dataset is all sunshine and roses. Every test case has the user explicitly telling the agent exactly what they want and which tool to use.
 
-In the wild, you'll encounter ambiguous requests that could match multiple tools, long complex requests with multiple potential actions, and requests missing critical information. You'll also get conversational inputs that don't need any tool at all.
+But real users are usually less straightforward. In the wild, you'll encounter ambiguous requests that could match multiple tools, long complex requests with multiple potential actions, and requests missing critical information. You'll also get conversational inputs that don't need any tool at all.
 
 To build a robust agent, you need to challenge it with adversarial inputs that expose its weaknesses.
 
@@ -10,11 +10,9 @@ To build a robust agent, you need to challenge it with adversarial inputs that e
 
 - [ ] Review the current test cases in `agent.eval.ts`
 
-The existing cases are straightforward - "Create a spreadsheet", "Translate hello world to Spanish". These are too easy because they explicitly state what the user wants.
+The existing cases are too straightforward. "Create a spreadsheet" explicitly states what the user wants. "Translate hello world to Spanish" might as well say "translate text" in it.
 
-- [ ] Understand the types of adversarial inputs you should add
-
-These challenge different aspects of the agent's reasoning:
+Here's a table of the types of adversarial inputs you should add:
 
 | Input Type                | Example                         | Why It's Tricky                                    |
 | ------------------------- | ------------------------------- | -------------------------------------------------- |
@@ -25,23 +23,27 @@ These challenge different aspects of the agent's reasoning:
 | Overlapping functionality | "Save this for later"           | Could be task, reminder, or backup                 |
 | Long complex requests     | Multiple actions in one message | Requires prioritization and clarification          |
 
-- [ ] Recognize when NO tool should be called
+- [ ] Understand when NO tool should be called
 
-For many adversarial cases, the agent should recognize that calling a tool would be wrong and respond conversationally instead. In your test data, you'll use `expected: { tool: null }` to indicate this.
+For many adversarial cases, the agent should recognize that calling a tool would be wrong and respond conversationally instead. In your test data, use `expected: { tool: null }` to indicate this.
+
+The [evaluation runner](/PLACEHOLDER/evalite) will check that `output.toolCalls.length` equals `0` when `expectedTool` is `null`.
 
 ### Adding Adversarial Test Cases
 
 - [ ] Locate the TODO comment in the test data array
 
-You'll find a TODO comment that lists suggestions for adversarial inputs to add. This is your starting point for expanding the dataset.
+You'll find a TODO comment that lists suggestions for adversarial inputs. This is your starting point for expanding the dataset.
 
 - [ ] Add test cases for ambiguous requests
 
-These should match multiple potential tools. Think about requests where the user's intent isn't crystal clear, and the agent needs to either pick the most appropriate tool or ask for clarification. Consider what would happen if someone asked to organize or save information without being specific about how.
+Think about requests where the user's intent isn't crystal clear. The agent needs to either pick the most appropriate tool or ask for clarification.
+
+Consider what would happen if someone asked to organize or save information without being specific about how.
 
 - [ ] Add test cases with missing critical information
 
-These requests lack essential details needed to execute a tool successfully. Think about scenarios where a user makes a request but hasn't provided all the required parameters. For example, what if someone wanted to send a message but didn't specify who to send it to?
+These requests lack essential details needed to execute a tool successfully. What if someone wanted to send a message but didn't specify who to send it to? Or wanted to book a flight without providing dates?
 
 - [ ] Add test cases for conversational input with no action
 
@@ -49,15 +51,21 @@ These are messages where the user is just chatting, not requesting a tool call. 
 
 - [ ] Add test cases for hypothetical scenarios
 
-These ask about tools rather than requesting their use. Think about requests where someone is asking questions about a tool's capabilities or asking "what if" - these shouldn't trigger tool calls. Consider how someone might ask for information about a process rather than requesting that process to be executed.
+These ask about tools rather than requesting their use. Think about requests where someone is asking questions about a tool's capabilities or asking "what if" - these shouldn't trigger tool calls.
+
+Consider how someone might ask for information about a process rather than requesting that process to be executed.
 
 - [ ] Add test cases for overlapping tool functionality
 
-These requests could legitimately use multiple different tools. Think about requests that are vague enough that several tools in your toolkit could potentially handle them. What's something a user might say where `setReminder`, `createTask`, and `createBackup` could all technically apply?
+These requests could legitimately use multiple different tools. Think about requests that are vague enough that several tools in your toolkit could potentially handle them.
+
+What's something a user might say where `setReminder`, `createTask`, and `createBackup` could all technically apply?
 
 - [ ] Add test cases for long, complex requests
 
-These have multiple potential actions or require prioritization. Create requests that mention multiple different things the user might want done. Consider whether the agent should call the first relevant tool, ask for clarification, or handle this differently.
+These have multiple potential actions or require prioritization. Create requests that mention multiple different things the user might want done.
+
+Consider whether the agent should call the first relevant tool, ask for clarification, or handle this differently.
 
 ### Testing With Different Models
 
@@ -71,7 +79,7 @@ This starts the evaluation runner in watch mode, which re-runs tests when you ma
 
 - [ ] Test with multiple models to see how they handle adversarial inputs
 
-The evaluation is already configured to test both [Gemini 2.0 Flash](/PLACEHOLDER/gemini-2.0-flash) and [GPT-4.1 Mini](/PLACEHOLDER/gpt-4.1-mini). You should see results for both models.
+The evaluation is already configured to test both [Gemini 2.0 Flash](/PLACEHOLDER/gemini-2.0-flash) and [GPT-4 Mini](/PLACEHOLDER/gpt-4-mini). You should see results for both models.
 
 - [ ] Compare the results between models
 

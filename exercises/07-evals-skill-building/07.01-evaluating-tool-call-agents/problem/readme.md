@@ -4,28 +4,39 @@ When building AI agents that use tools, we need to understand how well different
 
 The challenge becomes even more complex as we add more tools to our agent. How many tools can a model handle before it starts making mistakes? Which models are best at tool selection? These are the questions we need to answer through systematic evaluation.
 
-In this exercise, you'll set up an evaluation harness using [Evalite](https://evalite.dev) to test how well an agent selects and calls tools across different scenarios. You'll extract the tool calls from the agent's response and inspect them to see what the model decided to do.
+In this exercise, you'll set up an evaluation harness using [Evalite](/PLACEHOLDER/evalite) to test how well an agent selects and calls tools across different scenarios. You'll extract the [tool calls](/PLACEHOLDER/tool-calls) from the agent's response and inspect them to see what the model decided to do.
 
 ## Steps To Complete
 
 ### Understanding the Setup
 
 - [ ] Review the three test cases in `agent.eval.ts`
-  - Each case represents a different user request that should trigger specific tool calls
-  - The first asks about weather (should call `checkWeather`)
-  - The second asks to create a spreadsheet (should call `createSpreadsheet`)
-  - The third asks to send an email (should call `sendEmail`)
+
+Each case represents a different user request that should trigger specific tool calls:
+
+- Weather question → should call `checkWeather`
+- Spreadsheet request → should call `createSpreadsheet`
+- Email request → should call `sendEmail`
 
 - [ ] Examine the `runAgent` function in `agent.ts`
-  - It calls [`streamText`](/PLACEHOLDER/streamText) with a model, messages, tools, and a `stopWhen` condition
-  - The [`stepCountIs(1)`](/PLACEHOLDER/stepCountIs) tells the agent to take only one step before stopping
-  - This prevents the agent from executing the actual tool and allows us to inspect its decision
+
+The function calls [`streamText`](/PLACEHOLDER/streamText) with a model, messages, tools, and a `stopWhen` condition:
+
+```ts
+const result = runAgent(
+  wrapAISDKModel(google('gemini-2.0-flash')),
+  messages,
+  stepCountIs(1),
+);
+```
+
+The [`stepCountIs(1)`](/PLACEHOLDER/stepCountIs) tells the agent to take only one step before stopping. This prevents the agent from executing the actual tool and allows us to inspect its decision instead.
 
 ### Consuming the Stream
 
 - [ ] Locate the first TODO in the `task` function
 
-The `runAgent` function returns a stream that needs to be [consumed](/PLACEHOLDER/consuming-streams) before the agent completes execution. Here's how to do it:
+The `runAgent` function returns a stream that needs to be [consumed](/PLACEHOLDER/consuming-streams) before the agent completes execution.
 
 ```ts
 const result = runAgent(
@@ -37,39 +48,38 @@ const result = runAgent(
 // TODO: Consume the stream so the agent completes execution
 ```
 
-- [ ] Call [`consumeStream()`](/PLACEHOLDER/consumeStream) on the result to wait for the agent to finish
-  - This ensures all the data is available before you try to access it
+- [ ] Call [`consumeStream()`](/PLACEHOLDER/consumeStream) on the result
 
 ```ts
 await result.consumeStream();
 ```
 
+This ensures all the data is available before you try to access it.
+
 ### Extracting Tool Calls
 
 - [ ] Locate the second TODO about extracting tool calls
 
-The `result` object has a [`toolCalls`](/PLACEHOLDER/toolCalls) property that contains all the tools the agent decided to call. Here's what you need to do:
+The `result` object has a [`toolCalls`](/PLACEHOLDER/toolCalls) property that contains all the tools the agent decided to call. Map over it to create a cleaner structure:
 
 ```ts
 // TODO: Extract the toolCalls from the result
 // The result object has a toolCalls property that you need to await
 // Map the toolCalls to include only toolName and input for easier inspection
-```
 
-- [ ] Await the `toolCalls` property on the result
-  - This gives you an array of tool call objects
-  - Each object contains `toolName`, `input`, and other metadata
-
-- [ ] Map over the `toolCalls` array to create a cleaner structure
-  - Extract only `toolName` and `input` from each tool call
-  - This makes the evaluation output easier to read and understand
-
-```ts
 const toolCalls = (await result.toolCalls).map((toolCall) => ({
   toolName: toolCall.toolName,
   input: toolCall.input,
 }));
 ```
+
+- [ ] Await the `toolCalls` property on the result
+
+This gives you an array of tool call objects. Each object contains `toolName`, `input`, and other metadata.
+
+- [ ] Map over the `toolCalls` array
+
+Extract only `toolName` and `input` from each tool call. This makes the evaluation output easier to read and understand.
 
 ### Getting the Text Response
 
@@ -79,14 +89,13 @@ In case the agent didn't call any tools, you'll want to capture what it said ins
 
 ```ts
 // TODO: Get the text response from the result
+
+const text = await result.text;
 ```
 
 - [ ] Access the [`text`](/PLACEHOLDER/text-property) property from the result and await it
-  - This gives you the full text response from the model
 
-```ts
-const text = await result.text;
-```
+This gives you the full text response from the model.
 
 ### Returning the Results
 
@@ -96,36 +105,39 @@ Now combine everything into a single return object:
 
 ```ts
 // TODO: Return an object with toolCalls and text properties
-return {};
-```
 
-- [ ] Return an object with two properties:
-  - `toolCalls`: the array of tool calls you mapped earlier
-  - `text`: the text response from the model
-
-```ts
 return {
   toolCalls,
   text,
 };
 ```
 
+- [ ] Return an object with two properties
+
+| Property    | Description                                |
+| ----------- | ------------------------------------------ |
+| `toolCalls` | The array of tool calls you mapped earlier |
+| `text`      | The text response from the model           |
+
 ### Testing Your Implementation
 
 - [ ] Run the evaluation with `pnpm run dev`
-  - This starts [Evalite](https://evalite.dev) in watch mode
-  - It will run all three test cases automatically
 
-- [ ] Open [Evalite](https://evalite.dev) in your browser
-  - The output should show the three test cases
-  - Each one displays the `toolCalls` and `text` that were extracted
+This starts [Evalite](/PLACEHOLDER/evalite) in watch mode and runs all three test cases automatically.
+
+- [ ] Open [Evalite](/PLACEHOLDER/evalite) in your browser
+
+The output should show the three test cases with the `toolCalls` and `text` that were extracted.
 
 - [ ] Verify the results make sense
-  - The weather question should show `checkWeather` being called
-  - The spreadsheet request should show `createSpreadsheet` being called
-  - The email request should show `sendEmail` being called
-  - Each tool call should have the appropriate `input` parameters
+
+Check that:
+
+- The weather question shows `checkWeather` being called
+- The spreadsheet request shows `createSpreadsheet` being called
+- The email request shows `sendEmail` being called
+- Each tool call has the appropriate `input` parameters
 
 - [ ] Check the browser console for any errors
-  - If the stream consumption or extraction fails, you'll see errors here
-  - Debug any issues and re-run the evaluation
+
+If the stream consumption or extraction fails, you'll see errors here. Debug any issues and re-run the evaluation.
