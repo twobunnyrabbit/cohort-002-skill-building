@@ -1,42 +1,24 @@
-# AI SDK v5 Crash Course
+# Build a Personal Assistant in TypeScript
 
-<img src="https://res.cloudinary.com/total-typescript/image/upload/v1758027897/ai-sdk-v5-crash-course-github-thumbnail_2x.jpg" alt="AI SDK 5 Crash Course" />
+Repository for the [5-day cohort course](https://www.aihero.dev/cohorts/build-your-own-ai-personal-assistant-in-typescript) on building production AI systems with retrieval, memory, evals, and human-in-the-loop patterns.
 
-🚀 **Master AI SDK v5 with AI Hero's comprehensive crash course.** This repository contains all the code examples and exercises from our hands-on, practical course focused on AI SDK v5 - the incredible TypeScript library that's becoming the standard for AI app development.
-
-Learn to build production-ready AI applications using AI SDK v5's powerful features and modern development patterns. Available on [aihero.dev](https://aihero.dev).
-
-## 🎯 What You'll Master with AI SDK v5
-
-This crash course will take you from AI SDK v5 basics to advanced production patterns:
-
-- **AI SDK v5 Core Concepts** - Understanding the modern AI development toolkit
-- **Streaming with AI SDK v5** - Building real-time, responsive AI experiences using `streamText`
-- **Tool Calling & Function Calling** - Creating AI applications that can use external tools and APIs
-- **Message Parts & Data** - Working with structured message components and custom data
-- **Multi-Provider Support** - Seamlessly switching between OpenAI, Anthropic, Google, and more
-- **File & Image Handling** - Processing and working with multimedia content
-- **Advanced Memory Patterns** - Sophisticated state management and conversation handling
-- **Production-Ready Features** - Built-in testing, monitoring, and deployment capabilities
-
-## 🚀 Quick Start
-
-### Prerequisites
+## Prerequisites
 
 - [Node.js](https://nodejs.org/en/download) (version 22 or higher)
 - [pnpm](https://pnpm.io/) (recommended) or npm/yarn/bun
-- API keys for your preferred AI providers:
+- AI SDK v5 knowledge (prerequisite)
+- API keys for AI providers:
   - [OpenAI](https://platform.openai.com/api-keys) (GPT-4, GPT-3.5)
   - [Anthropic](https://console.anthropic.com/) (Claude)
   - [Google AI Studio](https://aistudio.google.com/apikey) (Gemini)
 
-### Setup
+## Quick Start
 
 1. **Clone this repository:**
 
 ```bash
-git clone https://github.com/ai-hero-dev/ai-engineering-crash-course.git
-cd ai-engineering-crash-course
+git clone https://github.com/mattpocock/cohort-002-skill-building.git
+cd cohort-002-skill-building
 ```
 
 2. **Install dependencies:**
@@ -51,9 +33,35 @@ pnpm install
 cp .env.example .env
 ```
 
-4. **Add your API keys to `.env`** and you're ready to start learning!
+4. **Add your API keys to `.env`** and you're ready to start!
 
-## 📚 Course Structure
+## Course Structure
+
+### Day 1-2: Retrieval (Sections 01-04)
+
+- BM25 keyword search, embeddings, rank fusion, query rewriting
+- Chunking (fixed-size vs structural), reranking
+- Agentic search, metadata-first patterns
+
+### Day 3: Memory (Sections 05-06)
+
+- Semantic and episodic memory
+- Working memory with infinite conversations
+- CRUD operations on memory store
+
+### Day 4: Evals (Sections 07-08)
+
+- Evalite framework testing
+- Deterministic scorers, LLM-as-judge
+- A/B testing models and prompts
+
+### Day 5: Human-in-the-Loop (Sections 09-10)
+
+- Approval flows for destructive actions
+- Thread-scoped permissions
+- MCP server integrations
+
+## Running Exercises
 
 Start by running `pnpm dev`:
 
@@ -65,23 +73,21 @@ This will allow you to choose between the different course sections.
 
 You can also run `pnpm exercise <exercise-number>` to jump to a specific exercise.
 
-## 📁 AI SDK v5 Course Modules
+## Exercise Structure
 
 ```
 exercises/
-├── 01-basics/                    # AI SDK v5 fundamentals
-│   ├── 01.1-what-is-the-ai-sdk/
-│   ├── 01.2-choosing-a-model/
-│   ├── 01.3-stream-text-to-terminal/
-│   ├── 01.4-ui-message-streams/
-│   ├── 01.5-stream-text-to-ui/
-│   └── 01.6-system-prompts/
-├── 02-agents/                    # Tool calling & agents
-├── 03-advanced/                  # Advanced patterns
-└── 99-reference/                 # Material reference
+├── 01-retrieval-skill-building/ (6 exercises)
+├── 02-retrieval-project-work/ (3 exercises)
+├── 03-retrieval-day-2-skill-building/ (5 exercises)
+├── 04-retrieval-day-2-project-work/ (4 exercises)
+├── 05-memory-skill-building/ (4 exercises)
+├── 06-memory-project-work/ (3 exercises)
+├── 07-evals-skill-building/ (6 exercises)
+├── 08-evals-project-work/ (2 exercises)
+├── 09-human-in-the-loop-skill-building/ (6 exercises)
+└── 10-human-in-the-loop-project-work/ (3 exercises)
 ```
-
-## 🛠️ Learning Workflow
 
 Each exercise follows this learning structure:
 
@@ -103,10 +109,23 @@ Each exercise follows this learning structure:
 - Extended walkthroughs of complex topics
 - Perfect for reinforcing your understanding
 
-## 🤝 Getting Help
+## Tech Stack
+
+- **AI SDK v5** - Core LLM interactions
+- **React 19 + Vite** - Frontend
+- **Hono** - Backend API framework
+- **okapibm25, embeddings** - Retrieval techniques
+- **Evalite** - Testing framework
+- **OpenAI, Anthropic, Google** - AI providers
+
+## Datasets
+
+- `datasets/emails.json` - Email corpus (75-547 emails)
+- `datasets/total-typescript-book.md` - TypeScript documentation
+- Custom dataset support via Gmail mbox export
+
+## Getting Help
 
 1. **Check the solution** - Each exercise has a completed version
 2. **Verify your setup** - Ensure API keys and dependencies are correct
-3. **Watch the course** - Full explanations available on [aihero.dev](https://aihero.dev)
-
-Ready to master AI SDK v5 and become an AI development expert? Let's start building the future! 🚀
+3. **Visit the course** - Full explanations available on [aihero.dev](https://www.aihero.dev/cohorts/build-your-own-ai-personal-assistant-in-typescript)
