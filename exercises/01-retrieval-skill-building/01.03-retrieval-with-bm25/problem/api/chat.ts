@@ -4,8 +4,11 @@ import {
   createUIMessageStream,
   createUIMessageStreamResponse,
   streamText,
+  generateObject,
   type UIMessage,
 } from 'ai';
+import { searchEmails } from './bm25.ts';
+import z from 'zod';
 
 const KEYWORD_GENERATOR_SYSTEM_PROMPT = `
   You are a helpful email assistant, able to search through emails for information.
@@ -20,11 +23,24 @@ export const POST = async (req: Request): Promise<Response> => {
     execute: async ({ writer }) => {
       // TODO: Implement a keyword generator that generates a list of keywords
       // based on the conversation history. Use generateObject to do this.
-      const keywords = TODO;
+      const keywords = await generateObject({
+        model: google('gemini-2.0-flash-lite'),
+        system: KEYWORD_GENERATOR_SYSTEM_PROMPT,
+        schema: z.object({
+          keywords: z.array(z.string()).describe("An array of keywords based on the conversastion history"),
+        }),
+        messages: convertToModelMessages(messages)
+      });
+
+      const keywordsResults = keywords.object.keywords
+
+      console.log(`generated keywords: ${keywordsResults}`);
+      console.dir(keywords.object);
 
       // TODO: Use the searchEmails function to get the top X number of
       // search results based on the keywords
-      const topSearchResults = TODO;
+      const topSearchResults = (await searchEmails(keywordsResults)).slice(0, 10);
+      // console.dir(topSearchResults);
 
       const emailSnippets = [
         '## Email Snippets',
@@ -49,11 +65,13 @@ export const POST = async (req: Request): Promise<Response> => {
         "Based on the emails above, please answer the user's question. Always cite your sources using the email subject in markdown format.",
       ].join('\n\n');
 
+      console.dir(emailSnippets);
+
       const answer = streamText({
         model: google('gemini-2.5-flash'),
         system: `You are a helpful email assistant that answers questions based on email content.
           You should use the provided emails to answer questions accurately.
-          ALWAYS cite sources using markdown formatting with the email subject as the source.
+          ALWAYS cite sources using markdown formatting with the email subject as the source in bold text.
           Be concise but thorough in your explanations.
         `,
         messages: [
