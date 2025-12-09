@@ -24,7 +24,7 @@ export const POST = async (req: Request): Promise<Response> => {
       // TODO: Implement a keyword generator that generates a list of keywords
       // based on the conversation history. Use generateObject to do this.
       const keywords = await generateObject({
-        model: google('gemini-2.0-flash-lite'),
+        model: google('gemini-2.0-flash-001'),
         system: KEYWORD_GENERATOR_SYSTEM_PROMPT,
         schema: z.object({
           keywords: z.array(z.string()).describe("An array of keywords based on the conversastion history"),
@@ -39,8 +39,12 @@ export const POST = async (req: Request): Promise<Response> => {
 
       // TODO: Use the searchEmails function to get the top X number of
       // search results based on the keywords
-      const topSearchResults = (await searchEmails(keywordsResults)).slice(0, 10);
-      // console.dir(topSearchResults);
+      const topSearchResults = (await searchEmails(keywordsResults)).slice(0, 10).filter((result) => result.score > 0);
+      
+      console.log(
+        'Top results:', 
+        topSearchResults.map((result) => result.email?.subject)
+      )
 
       const emailSnippets = [
         '## Email Snippets',
@@ -65,7 +69,7 @@ export const POST = async (req: Request): Promise<Response> => {
         "Based on the emails above, please answer the user's question. Always cite your sources using the email subject in markdown format.",
       ].join('\n\n');
 
-      console.dir(emailSnippets);
+      // console.dir(emailSnippets);
 
       const answer = streamText({
         model: google('gemini-2.5-flash'),
