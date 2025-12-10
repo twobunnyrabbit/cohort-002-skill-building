@@ -79,12 +79,17 @@ export const embedEmails = async (
   cacheKey: string,
 ): Promise<Embeddings> => {
   const emails = await loadEmails();
+  // if (emails) {
+  //   console.log(emails.map(email => email.subject));
+  // }
 
   const existingEmbeddings =
     await getExistingEmbeddings(cacheKey);
 
   if (existingEmbeddings) {
     return existingEmbeddings;
+  } else {
+    console.log('no existing embeddings found...');
   }
 
   const embeddings: Embeddings = {};
@@ -93,6 +98,7 @@ export const embedEmails = async (
   const chunkSize = 99;
   const chunks = [];
   for (let i = 0; i < emails.length; i += chunkSize) {
+    console.log(`chunking index ${i}`);
     chunks.push(emails.slice(i, i + chunkSize));
   }
 
@@ -106,6 +112,7 @@ export const embedEmails = async (
     });
 
     processedCount += chunk.length;
+    console.log(`processedCount: ${processedCount}`);
   }
 
   await saveEmbeddings(cacheKey, embeddings);
@@ -150,13 +157,34 @@ const embedLotsOfText = async (
   }[]
 > => {
   // TODO: Implement this function by using the embedMany function
-  throw new Error('Not implemented');
+  const { embeddings } = await embedMany({
+    model: myEmbeddingModel,
+    values: emails.map((email) => `${email.subject} ${email.body}`),
+    maxRetries: 0
+  })
+
+  const embedTextResults =  embeddings.map((embedding, index) => {
+    return {
+      id: emails[index]!.id,
+      embedding,
+    }
+  }) 
+  
+  return embedTextResults;
+
+  // throw new Error('Not implemented');
 };
 
 const embedOnePieceOfText = async (
   text: string,
 ): Promise<number[]> => {
   // TODO: Implement this function by using the embed function
+  const { embedding } = await embed({
+    model: myEmbeddingModel,
+    value: text, 
+  })
+
+  return embedding;
 };
 
 const calculateScore = (
@@ -164,4 +192,5 @@ const calculateScore = (
   embedding: number[],
 ): number => {
   // TODO: Implement this function by using the cosineSimilarity function
+  return cosineSimilarity(queryEmbedding, embedding);
 };
