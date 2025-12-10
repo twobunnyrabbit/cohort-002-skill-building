@@ -36,6 +36,9 @@ export const POST = async (req: Request): Promise<Response> => {
 
       // TODO: take the top X search results
       const topSearchResults = (await searchResults).slice(0, 5);
+      console.log(
+        topSearchResults.map((result) => `${result.email.subject} (${result.score})`)
+      );
 
       const emailSnippets = [
         '## Emails',
@@ -57,7 +60,7 @@ export const POST = async (req: Request): Promise<Response> => {
           ].join('\n\n');
         }),
         '## Instructions',
-        "Based on the emails above, please answer the user's question. Always cite your sources using the email subject in markdown format.",
+        "Based on the emails above, please answer the user's question. Always cite your sources using the email subject in markdown format and bold it.",
       ].join('\n\n');
 
       const answer = streamText({
