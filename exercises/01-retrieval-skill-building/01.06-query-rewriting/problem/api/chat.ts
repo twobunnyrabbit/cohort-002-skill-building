@@ -22,7 +22,7 @@ export const POST = async (req: Request): Promise<Response> => {
       const keywords = await generateObject({
         model: google('gemini-2.5-flash'),
         system: `You are a helpful email assistant, able to search emails for information.
-          Your job is to generate a list of keywords which will be used to search the emails.
+          Your job is to generate a list of keywords which will be used to search the emails. Additionally, generate a search query, which can be more general than the keywords.
         `,
         schema: z.object({
           keywords: z
@@ -30,6 +30,7 @@ export const POST = async (req: Request): Promise<Response> => {
             .describe(
               'A list of keywords to search the emails with. Use these for exact terminology.',
             ),
+          searhQuery: z.string().describe('Generalised search query based on keywords used for semantic search.')
         }),
         messages: convertToModelMessages(messages),
       });
@@ -38,7 +39,7 @@ export const POST = async (req: Request): Promise<Response> => {
 
       const searchResults = await searchEmails({
         keywordsForBM25: keywords.object.keywords,
-        embeddingsQuery: TODO,
+        embeddingsQuery: keywords.object.searhQuery,
       });
 
       const topSearchResults = searchResults.slice(0, 5);
@@ -72,7 +73,7 @@ export const POST = async (req: Request): Promise<Response> => {
         model: google('gemini-2.5-flash'),
         system: `You are a helpful email assistant that answers questions based on email content.
           You should use the provided emails to answer questions accurately.
-          ALWAYS cite sources using markdown formatting with the email subject as the source.
+          ALWAYS cite sources using markdown formatting with the email subject as the source in bolded text.
           Be concise but thorough in your explanations.
         `,
         messages: [
