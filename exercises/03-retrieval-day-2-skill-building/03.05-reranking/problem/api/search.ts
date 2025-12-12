@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { searchViaBM25 } from './bm25.ts';
 import { searchChunksViaEmbeddings } from './embeddings.ts';
 import { createChunks, reciprocalRankFusion } from './utils.ts';
+import { GalleryThumbnailsIcon } from 'lucide-react';
 
 export type RerankStatus =
   | 'approved'
@@ -106,7 +107,26 @@ export const searchChunks = async (opts: {
   // that are genuinely helpful for answering the question.
   // If a chunk is only tangentially related or not relevant,
   // exclude its ID.
-  const rerankedResults = TODO;
+  const rerankedResults = await generateObject({
+    model: google('gemini-2.5-flash-lite'),
+    system: `
+   You are a useful assistant that assists the user in re-ranking their chunk results and identify the most relevant chunks. Return only the IDs and not the full chunks. You should be selective and only include the chunks that are genuinely helpful for answering the question. If a chunk is only tangentially related or not relevant, exclude its ID.
+    `,
+    schema: z.object({
+      resultIds: z
+        .array(z.number())
+        .describe('Array of IDs for the most relevant chunks'),
+    }),
+    prompt: `
+    <search-query>
+    ${searchQuery}
+    </search-query>
+   
+    <chunks-with-id>
+    ${chunksWithId}
+    </chunks-with-id>
+    `,
+  });
 
   const approvedChunkIds = rerankedResults.object.resultIds;
 
